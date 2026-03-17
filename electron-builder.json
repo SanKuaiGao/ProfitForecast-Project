@@ -1,0 +1,32 @@
+{
+  "appId": "com.openai.profitforecast",
+  "productName": "Profit Forecast App",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "electron-main.js",
+    "package.json"
+  ],
+  "mac": {
+    "target": [
+      "dmg",
+      "zip"
+    ],
+    "category": "public.app-category.business"
+  },
+  "win": {
+    "target": [
+      "nsis",
+      "portable"
+    ],
+    "artifactName": "${productName}-${version}-${arch}.${ext}"
+  },
+  "linux": {
+    "target": [
+      "AppImage"
+    ],
+    "category": "Office"
+  }
+}

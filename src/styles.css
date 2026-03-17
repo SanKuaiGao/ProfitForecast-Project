@@ -1,0 +1,392 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.24), transparent 28%),
+    radial-gradient(circle at top right, rgba(196, 181, 253, 0.18), transparent 30%),
+    linear-gradient(180deg, #081120 0%, #0f172a 55%, #131e35 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.mobile-app-bg {
+  min-height: 100vh;
+  padding: 28px 16px;
+}
+
+.mobile-app-shell {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+  backdrop-filter: blur(16px);
+}
+
+.app-header,
+.hero-card,
+.tabbar,
+.form-card,
+.chart-panel,
+.metric-card,
+.entry-row,
+.forecast-card,
+.pagination-row {
+  border-radius: 28px;
+}
+
+.app-header,
+.hero-card,
+.form-card,
+.chart-panel,
+.pagination-row {
+  padding: 22px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.app-header h1,
+.hero-card h2,
+.section-copy h3 {
+  margin: 6px 0 0;
+}
+
+.app-header h1 {
+  font-size: clamp(28px, 4vw, 40px);
+}
+
+.app-header span,
+.section-copy span,
+.hero-card span,
+.metric-card span,
+.entry-row span,
+.forecast-card small,
+.pagination-row span {
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #93c5fd;
+}
+
+.header-chip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.18);
+  color: #dbeafe;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.hero-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.hero-card h2 {
+  font-size: clamp(36px, 5vw, 52px);
+}
+
+.hero-stats {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 680px);
+}
+
+.hero-stats-4 {
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+}
+
+.hero-stats > div,
+.metric-card,
+.forecast-card,
+.pagination-row {
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hero-stats small,
+.formula-box small {
+  display: block;
+  color: rgba(226, 232, 240, 0.68);
+  margin-bottom: 8px;
+}
+
+.hero-stats strong,
+.metric-card strong,
+.forecast-card strong,
+.formula-box strong,
+.entry-actions strong {
+  font-size: 18px;
+}
+
+.tabbar {
+  display: grid;
+  padding: 8px;
+  gap: 8px;
+}
+
+.tabbar-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.tabbar-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.tab {
+  padding: 14px 16px;
+  border-radius: 20px;
+  text-align: center;
+  color: rgba(226, 232, 240, 0.72);
+  font-weight: 600;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.36), rgba(99, 102, 241, 0.32));
+  color: white;
+}
+
+.page-body,
+.screen-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.compact-gap {
+  gap: 12px;
+}
+
+.section-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-copy.compact {
+  margin-bottom: 12px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label span {
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: white;
+  outline: none;
+}
+
+input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.primary-btn,
+.ghost-btn {
+  border: none;
+  cursor: pointer;
+}
+
+.primary-btn {
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.primary-btn.daily {
+  background: linear-gradient(135deg, #14b8a6, #22c55e);
+}
+
+.primary-btn.revenue {
+  background: linear-gradient(135deg, #06b6d4, #2563eb);
+}
+
+.primary-btn.cost {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+}
+
+.ghost-btn {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+.metrics-row,
+.forecast-list,
+.dual-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.metrics-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metrics-row-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dual-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.forecast-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.forecast-list-wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+}
+
+.metric-card strong {
+  font-size: 24px;
+}
+
+.formula-box {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.stacked-box {
+  grid-template-columns: 1fr;
+}
+
+.formula-box > div {
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.entry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 22px;
+}
+
+.entry-row strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.large-chart {
+  padding-bottom: 28px;
+}
+
+.company-card {
+  padding-top: 18px;
+}
+
+.single-section-gap {
+  margin-top: 18px;
+}
+
+.inner-chart-panel {
+  padding: 18px;
+}
+
+.pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 920px) {
+  .hero-card,
+  .app-header,
+  .entry-row,
+  .entry-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-stats-4,
+  .tabbar-4,
+  .tabbar-3,
+  .metrics-row,
+  .metrics-row-4,
+  .forecast-list,
+  .forecast-list-wide,
+  .dual-grid,
+  .formula-box,
+  .input-grid {
+    grid-template-columns: 1fr;
+  }
+}
