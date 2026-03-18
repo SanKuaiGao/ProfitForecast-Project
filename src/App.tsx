@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import {
   CartesianGrid,
@@ -309,7 +309,6 @@ function AppShell({
             <h1>{companyName || 'Your Company'}</h1>
             <span>Track daily profit and daily cost, manage monthly revenue and cost, and view short-term and monthly forecasts.</span>
           </div>
-          <div className="header-chip">App Style · No Login</div>
         </header>
 
         <section className="hero-card glass-card">
@@ -336,23 +335,6 @@ function AppShell({
               <strong>{formatCurrency(nextMonthly)}</strong>
             </div>
           </div>
-        </section>
-
-        <section className="glass-card form-card company-card">
-          <div className="section-copy compact">
-            <p className="eyebrow">Company</p>
-            <h3>Company Name</h3>
-            <span>This field is only for display and does not affect calculations.</span>
-          </div>
-          <label>
-            <span>Company Name</span>
-            <input
-              type="text"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Enter company name"
-            />
-          </label>
         </section>
 
         <nav className="tabbar glass-card tabbar-3">
@@ -926,7 +908,32 @@ function Pagination({
   );
 }
 
+function AnimatedScreen({ children }: { children: ReactNode }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  return (
+    <div
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0) scale(1)' : 'translateY(18px) scale(0.985)',
+        transition: 'opacity 320ms ease, transform 320ms ease',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
+  const [hasEnteredDashboard, setHasEnteredDashboard] = useState<boolean>(() => {
+    const saved = localStorage.getItem('profit-forecast-entered-dashboard');
+    return saved === 'true';
+  });
   const [companyName, setCompanyName] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.companyName) ?? '');
   const [dailyProfit, setDailyProfit] = useState<DailyEntry[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.dailyProfit);
@@ -965,18 +972,112 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.cost, JSON.stringify(sortMonthlyEntries(cost)));
   }, [cost]);
 
+  useEffect(() => {
+    localStorage.setItem('profit-forecast-entered-dashboard', String(hasEnteredDashboard));
+  }, [hasEnteredDashboard]);
+
+  return hasEnteredDashboard ? (
+    <AnimatedScreen>
+      <AppShell
+        companyName={companyName}
+        setCompanyName={setCompanyName}
+        dailyProfit={dailyProfit}
+        setDailyProfit={setDailyProfit}
+        dailyCost={dailyCost}
+        setDailyCost={setDailyCost}
+        revenue={revenue}
+        setRevenue={setRevenue}
+        cost={cost}
+        setCost={setCost}
+      />
+    </AnimatedScreen>
+  ) : (
+    <AnimatedScreen>
+      <WelcomeScreen
+        companyName={companyName}
+        setCompanyName={setCompanyName}
+        onContinue={() => setHasEnteredDashboard(true)}
+      />
+    </AnimatedScreen>
+  );
+}
+
+function WelcomeScreen({
+  companyName,
+  setCompanyName,
+  onContinue,
+}: {
+  companyName: string;
+  setCompanyName: Dispatch<SetStateAction<string>>;
+  onContinue: () => void;
+}) {
   return (
-    <AppShell
-      companyName={companyName}
-      setCompanyName={setCompanyName}
-      dailyProfit={dailyProfit}
-      setDailyProfit={setDailyProfit}
-      dailyCost={dailyCost}
-      setDailyCost={setDailyCost}
-      revenue={revenue}
-      setRevenue={setRevenue}
-      cost={cost}
-      setCost={setCost}
-    />
+    <div className="mobile-app-bg">
+      <div className="mobile-app-shell welcome-shell">
+        <section
+          className="glass-card welcome-card"
+          style={{
+            maxWidth: 560,
+            margin: '64px auto',
+            padding: '32px',
+          }}
+        >
+          <div className="section-copy" style={{ marginBottom: 20 }}>
+            <p className="eyebrow">Profit Forecast App</p>
+            <h1 style={{ marginBottom: 10 }}>Welcome</h1>
+            <span style={{ display: 'block', lineHeight: 1.6 }}>
+              Enter your company name to continue to the dashboard. Your daily and monthly
+              forecast tools are ready with sample data so you can start immediately.
+            </span>
+          </div>
+
+          <div
+            className="glass-card"
+            style={{
+              padding: 16,
+              marginBottom: 18,
+            }}
+          >
+            <label style={{ display: 'grid', gap: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Company Name</span>
+              <input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Enter company name"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && companyName.trim()) {
+                    onContinue();
+                  }
+                }}
+              />
+            </label>
+          </div>
+
+          <button
+            className="primary-btn"
+            onClick={() => {
+              if (!companyName.trim()) return;
+              onContinue();
+            }}
+            disabled={!companyName.trim()}
+            style={{ width: '100%' }}
+          >
+            Enter Dashboard
+          </button>
+
+          <p
+            style={{
+              marginTop: 14,
+              fontSize: 13,
+              opacity: 0.72,
+              textAlign: 'center',
+            }}
+          >
+            This step appears before the dashboard to personalize the app experience.
+          </p>
+        </section>
+      </div>
+    </div>
   );
 }
