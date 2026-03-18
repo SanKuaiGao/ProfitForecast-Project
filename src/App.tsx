@@ -1065,8 +1065,7 @@ function WelcomeScreen({
           >
             Enter Dashboard
           </button>
-
-          </p>
+          
         </section>
       </div>
     </div>
