@@ -48,19 +48,19 @@ const costSeed: MonthlyEntry[] = [
   { id: 'c6', month: '2026-03', amount: 89100 },
 ];
 
-const dailyProfitSeed: DailyEntry[] = [
-  { id: 'dp1', date: '2026-03-01', amount: 1620 },
-  { id: 'dp2', date: '2026-03-02', amount: 1840 },
-  { id: 'dp3', date: '2026-03-03', amount: 1710 },
-  { id: 'dp4', date: '2026-03-04', amount: 1935 },
-  { id: 'dp5', date: '2026-03-05', amount: 2070 },
-  { id: 'dp6', date: '2026-03-06', amount: 1980 },
-  { id: 'dp7', date: '2026-03-07', amount: 2210 },
-  { id: 'dp8', date: '2026-03-08', amount: 2140 },
-  { id: 'dp9', date: '2026-03-09', amount: 2290 },
-  { id: 'dp10', date: '2026-03-10', amount: 2350 },
-  { id: 'dp11', date: '2026-03-11', amount: 2405 },
-  { id: 'dp12', date: '2026-03-12', amount: 2480 },
+const dailyRevenueSeed: DailyEntry[] = [
+  { id: 'dr1', date: '2026-03-01', amount: 2480 },
+  { id: 'dr2', date: '2026-03-02', amount: 2750 },
+  { id: 'dr3', date: '2026-03-03', amount: 2600 },
+  { id: 'dr4', date: '2026-03-04', amount: 2870 },
+  { id: 'dr5', date: '2026-03-05', amount: 3050 },
+  { id: 'dr6', date: '2026-03-06', amount: 2935 },
+  { id: 'dr7', date: '2026-03-07', amount: 3235 },
+  { id: 'dr8', date: '2026-03-08', amount: 3150 },
+  { id: 'dr9', date: '2026-03-09', amount: 3350 },
+  { id: 'dr10', date: '2026-03-10', amount: 3445 },
+  { id: 'dr11', date: '2026-03-11', amount: 3515 },
+  { id: 'dr12', date: '2026-03-12', amount: 3620 },
 ];
 
 const dailyCostSeed: DailyEntry[] = [
@@ -80,7 +80,7 @@ const dailyCostSeed: DailyEntry[] = [
 
 const STORAGE_KEYS = {
   companyName: 'profit-forecast-company-name',
-  dailyProfit: 'profit-forecast-daily-profit',
+  dailyRevenue: 'profit-forecast-daily-revenue',
   dailyCost: 'profit-forecast-daily-cost',
   revenue: 'profit-forecast-revenue',
   cost: 'profit-forecast-cost',
@@ -184,8 +184,8 @@ function usePaginatedList<T>(items: T[], initialPage = 1) {
 function AppShell({
   companyName,
   setCompanyName,
-  dailyProfit,
-  setDailyProfit,
+  dailyRevenue,
+  setDailyRevenue,
   dailyCost,
   setDailyCost,
   revenue,
@@ -195,8 +195,8 @@ function AppShell({
 }: {
   companyName: string;
   setCompanyName: Dispatch<SetStateAction<string>>;
-  dailyProfit: DailyEntry[];
-  setDailyProfit: Dispatch<SetStateAction<DailyEntry[]>>;
+  dailyRevenue: DailyEntry[];
+  setDailyRevenue: Dispatch<SetStateAction<DailyEntry[]>>;
   dailyCost: DailyEntry[];
   setDailyCost: Dispatch<SetStateAction<DailyEntry[]>>;
   revenue: MonthlyEntry[];
@@ -221,8 +221,25 @@ function AppShell({
     });
   }, [cost, revenue]);
 
+  const dailyProfit = useMemo(() => {
+    const revenueMap = new Map(dailyRevenue.map((item) => [item.date, item.amount]));
+    const costMap = new Map(dailyCost.map((item) => [item.date, item.amount]));
+    const dates = Array.from(new Set([...revenueMap.keys(), ...costMap.keys()])).sort();
+
+    return dates.map((date) => {
+      const revenueValue = revenueMap.get(date) ?? 0;
+      const costValue = costMap.get(date) ?? 0;
+      return {
+        date,
+        revenue: revenueValue,
+        cost: costValue,
+        profit: revenueValue - costValue,
+      };
+    });
+  }, [dailyRevenue, dailyCost]);
+
   const dailyRegression = useMemo(
-    () => fitLinearRegression(dailyProfit.map((item) => item.amount)),
+    () => fitLinearRegression(dailyProfit.map((item) => item.profit)),
     [dailyProfit],
   );
   const monthlyRegression = useMemo(
@@ -246,7 +263,7 @@ function AppShell({
     });
 
     return [
-      ...dailyProfit.map((item) => ({ date: item.date, profit: item.amount, forecastProfit: null })),
+      ...dailyProfit.map((item) => ({ date: item.date, profit: item.profit, forecastProfit: null })),
       ...future,
     ];
   }, [dailyProfit, dailyRegression]);
@@ -286,16 +303,18 @@ function AppShell({
   }, [cost, monthlyProfit, revenue]);
 
   const dailySummary = useMemo(() => {
-    const totalProfit = dailyProfit.reduce((sum, item) => sum + item.amount, 0);
+    const totalRevenue = dailyRevenue.reduce((sum, item) => sum + item.amount, 0);
     const totalCost = dailyCost.reduce((sum, item) => sum + item.amount, 0);
+    const totalProfit = dailyProfit.reduce((sum, item) => sum + item.profit, 0);
     return {
+      totalRevenue,
       totalProfit,
       avgProfit: dailyProfit.length ? totalProfit / dailyProfit.length : 0,
-      latest: dailyProfit[dailyProfit.length - 1]?.amount ?? 0,
+      latest: dailyProfit[dailyProfit.length - 1]?.profit ?? 0,
       totalCost,
       avgCost: dailyCost.length ? totalCost / dailyCost.length : 0,
     };
-  }, [dailyProfit, dailyCost]);
+  }, [dailyRevenue, dailyProfit, dailyCost]);
 
   const nextDaily = dailyForecastData.find((item) => item.forecastProfit !== null)?.forecastProfit ?? 0;
   const nextMonthly = monthlyForecastData.find((item) => item.forecastProfit !== null)?.forecastProfit ?? 0;
@@ -319,7 +338,7 @@ function AppShell({
           </div>
           <div className="hero-stats hero-stats-4">
             <div>
-              <small>Daily Avg Profit</small>
+              <small>Avg Daily Profit</small>
               <strong>{formatCurrency(dailySummary.avgProfit)}</strong>
             </div>
             <div>
@@ -354,7 +373,7 @@ function AppShell({
             <Route path="/" element={<Navigate to="/daily" replace />} />
             <Route
               path="/daily"
-              element={<DailyPage profitEntries={dailyProfit} setProfitEntries={setDailyProfit} costEntries={dailyCost} setCostEntries={setDailyCost} />}
+              element={<DailyPage revenueEntries={dailyRevenue} setRevenueEntries={setDailyRevenue} costEntries={dailyCost} setCostEntries={setDailyCost} dailyProfit={dailyProfit} />}
             />
             <Route
               path="/monthly"
@@ -430,17 +449,17 @@ function DailySection({
   }
 
   const chartData = sorted.map((item) => ({ label: dayLabel(item.date), value: item.amount }));
-  const isProfit = accent === 'daily';
+  const isRevenue = accent === 'daily';
 
   return (
     <section className="glass-card form-card">
       <div className="section-copy">
-        <p className="eyebrow">{isProfit ? 'Daily Profit' : 'Daily Cost'}</p>
+        <p className="eyebrow">{isRevenue ? 'Daily Revenue' : 'Daily Cost'}</p>
         <h3>{title}</h3>
         <span>
-          {isProfit
-            ? 'Enter one daily profit value per day. If the same date is entered again, the record is updated automatically.'
-            : 'Manage daily cost on the same daily page, similar to the monthly cost section.'}
+          {isRevenue
+            ? 'Enter one daily revenue value per day. If the same date is entered again, the record is updated automatically.'
+            : 'Manage daily cost on the same daily page. Daily profit is calculated automatically from revenue minus cost.'}
         </span>
       </div>
 
@@ -450,12 +469,12 @@ function DailySection({
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <label>
-          <span>{isProfit ? 'Profit' : 'Cost'}</span>
+          <span>{isRevenue ? 'Revenue' : 'Cost'}</span>
           <input
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder={isProfit ? 'e.g. 2360' : 'e.g. 1080'}
+            placeholder={isRevenue ? 'e.g. 3360' : 'e.g. 1080'}
           />
         </label>
       </div>
@@ -472,8 +491,8 @@ function DailySection({
 
       <section className="glass-card chart-panel inner-chart-panel">
         <div className="section-copy compact">
-          <h3>{isProfit ? 'Daily Profit Trend' : 'Daily Cost Trend'}</h3>
-          <span>{isProfit ? 'A quick view of recent daily profit performance.' : 'A quick view of recent daily cost performance.'}</span>
+          <h3>{isRevenue ? 'Daily Revenue Trend' : 'Daily Cost Trend'}</h3>
+          <span>{isRevenue ? 'A quick view of recent daily revenue performance.' : 'A quick view of recent daily cost performance.'}</span>
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={chartData}>
@@ -491,7 +510,7 @@ function DailySection({
           <div className="glass-card entry-row" key={item.id}>
             <div>
               <strong>{item.date}</strong>
-              <span>{isProfit ? 'Daily profit record' : 'Daily cost record'}</span>
+              <span>{isRevenue ? 'Daily revenue record' : 'Daily cost record'}</span>
             </div>
             <div className="entry-actions">
               <strong>{formatCurrency(item.amount)}</strong>
@@ -508,40 +527,70 @@ function DailySection({
 }
 
 function DailyPage({
-  profitEntries,
-  setProfitEntries,
+  revenueEntries,
+  setRevenueEntries,
   costEntries,
   setCostEntries,
+  dailyProfit,
 }: {
-  profitEntries: DailyEntry[];
-  setProfitEntries: Dispatch<SetStateAction<DailyEntry[]>>;
+  revenueEntries: DailyEntry[];
+  setRevenueEntries: Dispatch<SetStateAction<DailyEntry[]>>;
   costEntries: DailyEntry[];
   setCostEntries: Dispatch<SetStateAction<DailyEntry[]>>;
+  dailyProfit: { date: string; revenue: number; cost: number; profit: number }[];
 }) {
-  const totalProfit = profitEntries.reduce((sum, item) => sum + item.amount, 0);
-  const avgProfit = profitEntries.length ? totalProfit / profitEntries.length : 0;
+  const totalRevenue = revenueEntries.reduce((sum, item) => sum + item.amount, 0);
+  const avgRevenue = revenueEntries.length ? totalRevenue / revenueEntries.length : 0;
   const totalCost = costEntries.reduce((sum, item) => sum + item.amount, 0);
   const avgCost = costEntries.length ? totalCost / costEntries.length : 0;
+  const totalProfit = dailyProfit.reduce((sum, item) => sum + item.profit, 0);
+  const avgProfit = dailyProfit.length ? totalProfit / dailyProfit.length : 0;
+
+  const chartData = dailyProfit.map((item) => ({
+    label: dayLabel(item.date),
+    revenue: item.revenue,
+    cost: item.cost,
+    profit: item.profit,
+  }));
 
   return (
     <div className="screen-stack">
       <section className="glass-card form-card">
         <div className="section-copy">
           <p className="eyebrow">Daily Finance</p>
-          <h3>Daily Profit and Daily Cost</h3>
-          <span>Daily profit forecasting still uses the saved daily profit series, and daily cost is now tracked in a matching section on this page.</span>
+          <h3>Daily Revenue and Daily Cost</h3>
+          <span>Enter daily revenue and daily cost. The app automatically calculates daily profit as revenue minus cost and uses that derived daily profit for forecasting.</span>
         </div>
       </section>
 
       <section className="metrics-row metrics-row-4">
-        <MetricCard label="Profit Days" value={profitEntries.length} />
-        <MetricCard label="Avg Daily Profit" value={formatCurrency(avgProfit)} />
-        <MetricCard label="Cost Days" value={costEntries.length} />
+        <MetricCard label="Revenue Days" value={revenueEntries.length} />
+        <MetricCard label="Avg Daily Revenue" value={formatCurrency(avgRevenue)} />
         <MetricCard label="Avg Daily Cost" value={formatCurrency(avgCost)} />
+        <MetricCard label="Avg Daily Profit" value={formatCurrency(avgProfit)} />
+      </section>
+
+      <section className="glass-card chart-panel large-chart">
+        <div className="section-copy compact">
+          <h3>Daily Revenue, Cost, and Profit</h3>
+          <span>Daily profit is calculated automatically from the daily revenue and daily cost series.</span>
+        </div>
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="revenue" name="Revenue" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="cost" name="Cost" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="profit" name="Profit" strokeWidth={3} dot={{ r: 4 }} />
+          </LineChart>
+        </ResponsiveContainer>
       </section>
 
       <section className="dual-grid">
-        <DailySection title="Daily Profit" accent="daily" entries={profitEntries} setEntries={setProfitEntries} />
+        <DailySection title="Daily Revenue" accent="daily" entries={revenueEntries} setEntries={setRevenueEntries} />
         <DailySection title="Daily Cost" accent="cost" entries={costEntries} setEntries={setCostEntries} />
       </section>
     </div>
@@ -736,9 +785,9 @@ function ForecastPage({
   monthlyForecastData,
   monthlySummary,
 }: {
-  dailyProfit: DailyEntry[];
+  dailyProfit: any[];
   dailyForecastData: { date: string; profit: number | null; forecastProfit: number | null }[];
-  dailySummary: { totalProfit: number; avgProfit: number; latest: number; totalCost: number; avgCost: number };
+  dailySummary: { totalRevenue: number; totalProfit: number; avgProfit: number; latest: number; totalCost: number; avgCost: number };
   monthlyProfit: { month: string; revenue: number; cost: number; profit: number }[];
   monthlyForecastData: { month: string; profit: number | null; forecastProfit: number | null }[];
   monthlySummary: { totalRevenue: number; totalCost: number; totalProfit: number; avgProfit: number };
@@ -762,7 +811,7 @@ function ForecastPage({
           <div className="section-copy">
             <p className="eyebrow">Daily Forecast</p>
             <h3>Daily Profit Forecast</h3>
-            <span>Short-term projection based on the saved daily profit sequence. The app forecasts the next 7 days.</span>
+            <span>Short-term projection based on derived daily profit, where daily profit equals daily revenue minus daily cost. The app forecasts the next 7 days.</span>
           </div>
           <div className="formula-box stacked-box">
             <div>
@@ -935,9 +984,9 @@ export default function App() {
     return saved === 'true';
   });
   const [companyName, setCompanyName] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.companyName) ?? '');
-  const [dailyProfit, setDailyProfit] = useState<DailyEntry[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.dailyProfit);
-    return saved ? sortDailyEntries(JSON.parse(saved)) : dailyProfitSeed;
+  const [dailyRevenue, setDailyRevenue] = useState<DailyEntry[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.dailyRevenue);
+    return saved ? sortDailyEntries(JSON.parse(saved)) : dailyRevenueSeed;
   });
   const [dailyCost, setDailyCost] = useState<DailyEntry[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.dailyCost);
@@ -957,8 +1006,8 @@ export default function App() {
   }, [companyName]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.dailyProfit, JSON.stringify(sortDailyEntries(dailyProfit)));
-  }, [dailyProfit]);
+    localStorage.setItem(STORAGE_KEYS.dailyRevenue, JSON.stringify(sortDailyEntries(dailyRevenue)));
+  }, [dailyRevenue]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.dailyCost, JSON.stringify(sortDailyEntries(dailyCost)));
@@ -981,8 +1030,8 @@ export default function App() {
       <AppShell
         companyName={companyName}
         setCompanyName={setCompanyName}
-        dailyProfit={dailyProfit}
-        setDailyProfit={setDailyProfit}
+        dailyRevenue={dailyRevenue}
+        setDailyRevenue={setDailyRevenue}
         dailyCost={dailyCost}
         setDailyCost={setDailyCost}
         revenue={revenue}
@@ -1065,7 +1114,7 @@ function WelcomeScreen({
           >
             Enter Dashboard
           </button>
-          
+
         </section>
       </div>
     </div>
