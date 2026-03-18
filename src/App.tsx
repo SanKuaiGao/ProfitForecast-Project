@@ -1065,16 +1065,6 @@ function WelcomeScreen({
           >
             Enter Dashboard
           </button>
-
-          <p
-            style={{
-              marginTop: 14,
-              fontSize: 13,
-              opacity: 0.72,
-              textAlign: 'center',
-            }}
-          >
-            This step appears before the dashboard to personalize the app experience.
           </p>
         </section>
       </div>
