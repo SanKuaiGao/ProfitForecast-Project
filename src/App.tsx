@@ -582,9 +582,9 @@ function DailyPage({
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="revenue" name="Revenue" strokeWidth={3} dot={{ r: 4 }} />
-            <Line type="monotone" dataKey="cost" name="Cost" strokeWidth={3} dot={{ r: 4 }} />
-            <Line type="monotone" dataKey="profit" name="Profit" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#22c55e" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="cost" name="Cost" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="profit" name="Profit" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} />
           </LineChart>
         </ResponsiveContainer>
       </section>
@@ -762,9 +762,9 @@ function MonthlyPage({
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="revenue" name="Revenue" strokeWidth={3} dot={{ r: 4 }} />
-            <Line type="monotone" dataKey="cost" name="Cost" strokeWidth={3} dot={{ r: 4 }} />
-            <Line type="monotone" dataKey="profit" name="Profit" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#22c55e" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="cost" name="Cost" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="profit" name="Profit" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} />
           </LineChart>
         </ResponsiveContainer>
       </section>
